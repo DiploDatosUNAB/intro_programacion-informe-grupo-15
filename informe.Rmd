@@ -1,36 +1,146 @@
 ---
-title: "titulo"
-author: "nombres"
+title: "Trabajo Práctico 1"
+author: "Ankudowicz Santiago y Ferrero Kevin"
 output: html_document
 ---
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-# Cargar los paquetes necesarios acá
+library(readr)
+library(dplyr)
+library(ggplot2)
 ```
 
 
 ## Introducción
+Los datos corresponden a reseñas de vinos publicadas en la revista Wine Enthusiast. 
 
-
+Los datos originales fueron extraídos de [Kaggle](https://www.kaggle.com/zynicide/wine-reviews), que los obtuvo desde Wine Enthusiast  la semana del 15 de junio de 2017. Luego fueron traducidos. En este informe estamos utilizando un archivo csv tal como fue provisto por el docente de la materia. 
 
 ## Exploración de los datos
 
 
 ```{r}
 # Código para cargar o leer los datos
+vinos <- read.csv("datos/vinos.csv")
 ```
 
-
+¿Qué variables tiene? Tiene 10 variables. 
+Puedo averiguar esto utilizando str() o ls()
 
 ```{r}
-# Cödigo de R acá 
-# Agregá más bloques según sea necesario
+# Uso la función str() para obtener una descripción sintética del data.frame "vinos"
+str(vinos)
 ```
 
+```{r}
+# Uso ls() para listar los objetos (vectores) incluidos en "vinos"
+ls(vinos)
+```
+¿Cuántas observaciones hay? Hay 129.971 observaciones
+Este resultado también se obtiene de los resultados de str().
+Alternativamente, se puede utilizar la función nrow()
 
+```{r}
+nrow(vinos)
+```
+¿Cuántas variables? Como ya dijimos, hay un total de 10 variables. 
+
+## Análisis de variables seleccionadas 
+
+Puedo utilizar la función summary() y obtener algunos estádisticos para las variables numéricas: mínimo, máximo, promedio, cuartiles, mediana, etc.
+
+```{r}
+vinos |>
+  select(precio, puntos) |>
+  summary()
+```
+Alternativamente, se podría haber utilizado las siguientes operaciones para obtener resultados similares
+
+```{r}
+# Caracterizo la variable precio
+vinos|>
+  summarise(precio_promedio = mean(precio, na.rm = TRUE), 
+            precio_desvest = sd(precio, na.rm = TRUE),
+            precio_mín = min(precio, na.rm = TRUE),
+            precio_máx = max(precio, na.rm = TRUE))
+```
+
+```{r}
+# Caracterizo la variable puntos
+vinos|>
+  summarise(puntos_promedio = mean(puntos, na.rm = TRUE), 
+            puntos_desvest = sd(puntos, na.rm = TRUE),
+            puntos_mín = min(puntos, na.rm = TRUE),
+            puntos_máx = max(puntos, na.rm = TRUE))
+```
+
+- ¿Hay alguna anomalía que sugiera que hay datos incorrectos? Valores imposibles (como valores negativos en una variable que sólo puede ser positiva) o poco creíbles.
+
+No se observan valores atípicos para las variables precio y puntos. 
+Específicamente para la variable precio, hay algunos valores muy por encima del resto, pero no parece tratarse de un error. De todas maneras, se podría recalcular el promedio excluyendo los valores extremos para evaluar su impacto sobre el precio promedio.
+
+```{r}
+vinos|>
+  summarise(precio_promedio = mean(precio, trim = 0.001, na.rm = TRUE))
+```
+Como se observa el impacto de esta exclusión no es muy significativo.
+
+Además, podemos graficar la cantidad de vinos reseñados para cada precio.
+Primero generamos un data.frame auxiliar y luego lo utilizamos para graficar
+```{r}
+cantidad <- vinos |>
+  group_by(precio) |>
+  summarise(cantidad = n())
+
+```
+
+```{r}
+ggplot(data = cantidad, mapping = aes(x = precio, y = cantidad))+
+  geom_point()
+```
+
+Esto nos confirma que son pocos los vinos con precios muy elevados. 
+
+- ¿Cuántas observaciones hay por cada grupo? ¿Cuántos valores faltantes? ¿Hay diferencias?
+
+Para responder estas preguntas empezamos agrupando por país, detallando la cantidad de reseñas para cada uno y las presentamos en orden descendente 
+
+```{r}
+vinos |>
+  group_by(pais) |>
+  summarise(cantidad_resenas= n()) |>
+  arrange(desc(cantidad_resenas))
+```
+Para saber cuantos valores faltantes hay por cada variable y en cada grupo, podemos hacer lo siguiente (almacenamos los resultados en un nuevo data.frame para utilizarlo luego con mayor facilidad)
+
+```{r}
+vinos_pais_nas <- vinos %>%
+  group_by(pais) %>% 
+  summarise(cantidad_reseñas = n(), pais_nas = sum(is.na(pais)), nombre_nas = sum(is.na(nombre)), puntos_nas = sum(is.na(puntos)), precio_nas = sum(is.na(precio)), provincia_nas = sum(is.na(provincia)), region_1_nas = sum(is.na(region_1)), region_2_nas = sum(is.na(region_2)), variedad_nas = sum(is.na(variedad)), vina_nas = sum(is.na(vina)), titulo_resena_nas = sum(is.na(titulo_resena))) %>%
+  arrange(desc(cantidad_reseñas))
+```
+
+Esto nos permite conocer la cantidad de valores faltantes de cada grupo para cada variable. 
+Para evaluar si existen diferencias entre grupos resulta más conveniente ver la proporcion de valores faltantes en el total de reseñas, a continuación se presenta este procedimiento para la variable nombre a modo de ejemplo
+
+```{r}
+vinos_pais_nas <- vinos_pais_nas |>
+  mutate(proporción_nombre_nas = nombre_nas/cantidad_reseñas)
+```
+
+```{r}
+vinos_pais_nas |>
+  select(pais, proporción_nombre_nas, cantidad_reseñas) |>
+  arrange(desc(proporción_nombre_nas))
+```
+La cantidad de nombres faltantes difiere entre paises. Este análisis podría replicarse para otras variables. 
 
 ## Hipótesis
 
+1- Los vinos de mayor precio reciben mayor puntaje.
 
+2- En cada provincia/region la producción se especializa fuertemente en una variedad particular de vinos.
+
+3- Para las variedades de vinos más reseñadas, el precio difiere significativamente según se trate de vinos provenientes del hemisferio norte o del hemisferio sur.

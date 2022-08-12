@@ -376,15 +376,66 @@ Wine Enthusiast.</p>
 obtuvo desde Wine Enthusiast la semana del 15 de junio de 2017. Luego
 fueron traducidos. En este informe estamos utilizando un archivo csv tal
 como fue provisto por el docente de la materia.</p>
+<pre class="r"><code># Código para cargar o leer los datos
+vinos &lt;- read.csv(&quot;datos/vinos.csv&quot;)</code></pre>
+<pre class="r"><code># Listo los países de los que provienen los vinos reseñados y detallo cuantos provienen de cada país
+vinos |&gt; count(pais)</code></pre>
+<pre><code>##                    pais     n
+## 1              Alemania  2165
+## 2             Argentina  3800
+## 3               Armenia     2
+## 4             Australia  2329
+## 5               Austria  3345
+## 6  Bosnia y Herzegovina     2
+## 7                Brazil    52
+## 8              Bulgaria   141
+## 9                Canadá   257
+## 10                Chile  4472
+## 11                China     1
+## 12               Chipre    11
+## 13              Croacia    73
+## 14               Egipto     1
+## 15           Eslovaquia     1
+## 16            Eslovenia    87
+## 17               España  6645
+## 18       Estados Unidos 54504
+## 19              Francia 22093
+## 20              Georgia    86
+## 21               Grecia   466
+## 22              Hungría   146
+## 23                India     9
+## 24           Inglaterra    74
+## 25               Israel   505
+## 26               Italia 19540
+## 27               Líbano    35
+## 28           Luxemburgo     6
+## 29            Macedonia    12
+## 30            Marruecos    28
+## 31               México    70
+## 32             Moldavia    59
+## 33        Nueva Zelanda  1419
+## 34                 Perú    16
+## 35             Portugal  5691
+## 36      República Checa    12
+## 37              Rumania   120
+## 38               Serbia    12
+## 39            Sudáfrica  1401
+## 40                Suiza     7
+## 41              Turquía    90
+## 42              Ucrania    14
+## 43              Uruguay   109
+## 44                 &lt;NA&gt;    63</code></pre>
 </div>
 <div id="exploración-de-los-datos" class="section level2">
 <h2>Exploración de los datos</h2>
-<pre class="r"><code># Código para cargar o leer los datos
-vinos &lt;- read.csv(&quot;datos/vinos.csv&quot;)</code></pre>
-<p>¿Qué variables tiene? Tiene 10 variables. Puedo averiguar esto
-utilizando str() o ls()</p>
-<pre class="r"><code># Uso la función str() para obtener una descripción sintética del data.frame &quot;vinos&quot;
-str(vinos)</code></pre>
+<p>¿Qué variables tiene? Tiene 10 variables</p>
+<p>Puedo usar la función ´ls()´ para listar las variables</p>
+<pre class="r"><code>ls(vinos)</code></pre>
+<pre><code>##  [1] &quot;nombre&quot;        &quot;pais&quot;          &quot;precio&quot;        &quot;provincia&quot;    
+##  [5] &quot;puntos&quot;        &quot;region_1&quot;      &quot;region_2&quot;      &quot;titulo_resena&quot;
+##  [9] &quot;variedad&quot;      &quot;vina&quot;</code></pre>
+<p>También se puede usar la función ´str()´</p>
+<pre class="r"><code>str(vinos)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    129971 obs. of  10 variables:
 ##  $ pais         : chr  &quot;Italia&quot; &quot;Portugal&quot; &quot;Estados Unidos&quot; &quot;Estados Unidos&quot; ...
 ##  $ nombre       : chr  &quot;Vulkà Bianco&quot; &quot;Avidagos&quot; NA &quot;Reserve Late Harvest&quot; ...
@@ -396,148 +447,202 @@ str(vinos)</code></pre>
 ##  $ variedad     : chr  &quot;Ensamblaje Blanco&quot; &quot;Portuguese Red&quot; &quot;Pinot Gris&quot; &quot;Riesling&quot; ...
 ##  $ vina         : chr  &quot;Nicosia&quot; &quot;Quinta dos Avidagos&quot; &quot;Rainstorm&quot; &quot;St. Julian&quot; ...
 ##  $ titulo_resena: chr  &quot;Nicosia 2013 Vulkà Bianco  (Etna)&quot; &quot;Quinta dos Avidagos 2011 Avidagos Red (Douro)&quot; &quot;Rainstorm 2013 Pinot Gris (Willamette Valley)&quot; &quot;St. Julian 2013 Reserve Late Harvest Riesling (Lake Michigan Shore)&quot; ...</code></pre>
-<pre class="r"><code># Uso ls() para listar los objetos (vectores) incluidos en &quot;vinos&quot;
-ls(vinos)</code></pre>
-<pre><code>##  [1] &quot;nombre&quot;        &quot;pais&quot;          &quot;precio&quot;        &quot;provincia&quot;    
-##  [5] &quot;puntos&quot;        &quot;region_1&quot;      &quot;region_2&quot;      &quot;titulo_resena&quot;
-##  [9] &quot;variedad&quot;      &quot;vina&quot;</code></pre>
-<p>¿Cuántas observaciones hay? Hay 129.971 observaciones Este resultado
-también se obtiene de los resultados de str(). Alternativamente, se
-puede utilizar la función nrow()</p>
+<p>¿Cuántas observaciones hay?</p>
+<p>Tiene un total de 129.971 observaciones. El dato se puede obtener
+usando ´str()´. También se puede utilizar ´nrow()´.</p>
 <pre class="r"><code>nrow(vinos)</code></pre>
 <pre><code>## [1] 129971</code></pre>
-<p>¿Cuántas variables? Como ya dijimos, hay un total de 10
-variables.</p>
-</div>
-<div id="análisis-de-variables-seleccionadas" class="section level2">
-<h2>Análisis de variables seleccionadas</h2>
-<p>Puedo utilizar la función summary() y obtener algunos estádisticos
-para las variables numéricas: mínimo, máximo, promedio, cuartiles,
-mediana, etc.</p>
-<pre class="r"><code>vinos |&gt;
-  select(precio, puntos) |&gt;
-  summary()</code></pre>
-<pre><code>##      precio            puntos      
-##  Min.   :   4.00   Min.   : 80.00  
-##  1st Qu.:  17.00   1st Qu.: 86.00  
-##  Median :  25.00   Median : 88.00  
-##  Mean   :  35.36   Mean   : 88.45  
-##  3rd Qu.:  42.00   3rd Qu.: 91.00  
-##  Max.   :3300.00   Max.   :100.00  
-##  NA&#39;s   :8996</code></pre>
-<p>Alternativamente, se podría haber utilizado las siguientes
-operaciones para obtener resultados similares</p>
-<pre class="r"><code># Caracterizo la variable precio
-vinos|&gt;
+<p>Seleccioná algunas variables resulten interesantes y mostrá sus
+propiedades. - ¿Cuál es su valor medio y desvío estándard? - ¿Cuál es su
+rango (valor máximo y valor mínimo)? - ¿Hay alguna anomalía que sugiera
+que hay datos incorrectos? Valores imposibles (como valores negativos en
+una variable que sólo puede ser positiva) o poco creíbles. - ¿Cuántas
+observaciones hay por cada grupo? ¿Cuántos valores faltantes? ¿Hay
+diferencias?</p>
+<p>Caracterizo la variable precio</p>
+<pre class="r"><code>vinos|&gt;
   summarise(precio_promedio = mean(precio, na.rm = TRUE), 
             precio_desvest = sd(precio, na.rm = TRUE),
             precio_mín = min(precio, na.rm = TRUE),
             precio_máx = max(precio, na.rm = TRUE))</code></pre>
 <pre><code>##   precio_promedio precio_desvest precio_mín precio_máx
 ## 1        35.36339       41.02222          4       3300</code></pre>
-<pre class="r"><code># Caracterizo la variable puntos
-vinos|&gt;
-  summarise(puntos_promedio = mean(puntos, na.rm = TRUE), 
-            puntos_desvest = sd(puntos, na.rm = TRUE),
-            puntos_mín = min(puntos, na.rm = TRUE),
-            puntos_máx = max(puntos, na.rm = TRUE))</code></pre>
-<pre><code>##   puntos_promedio puntos_desvest puntos_mín puntos_máx
-## 1        88.44714        3.03973         80        100</code></pre>
-<ul>
-<li>¿Hay alguna anomalía que sugiera que hay datos incorrectos? Valores
-imposibles (como valores negativos en una variable que sólo puede ser
-positiva) o poco creíbles.</li>
-</ul>
-<p>No se observan valores atípicos para las variables precio y puntos.
-Específicamente para la variable precio, hay algunos valores muy por
-encima del resto, pero no parece tratarse de un error. De todas maneras,
-se podría recalcular el promedio excluyendo los valores extremos para
-evaluar su impacto sobre el precio promedio.</p>
+<p>#Averiguo cuantos vinos tienen precio mayor a 1000</p>
+<pre class="r"><code>count(filter(vinos, precio &gt; 1000))</code></pre>
+<pre><code>##    n
+## 1 14</code></pre>
+<p>Caracterizo la variable puntos</p>
 <pre class="r"><code>vinos|&gt;
-  summarise(precio_promedio = mean(precio, trim = 0.001, na.rm = TRUE))</code></pre>
-<pre><code>##   precio_promedio
-## 1        34.66656</code></pre>
-<p>Como se observa el impacto de esta exclusión no es muy
-significativo.</p>
-<p>Además, podemos graficar la cantidad de vinos reseñados para cada
-precio. Primero generamos un data.frame auxiliar y luego lo utilizamos
-para graficar</p>
+  summarise(puntaje_promedio = mean(puntos, na.rm = TRUE), 
+            puntaje_desvest = sd(puntos, na.rm = TRUE),
+            puntaje_mín = min(puntos, na.rm = TRUE),
+            puntaje_máx = max(puntos, na.rm = TRUE))</code></pre>
+<pre><code>##   puntaje_promedio puntaje_desvest puntaje_mín puntaje_máx
+## 1         88.44714         3.03973          80         100</code></pre>
 <pre class="r"><code>cantidad &lt;- vinos |&gt;
   group_by(precio) |&gt;
   summarise(cantidad = n())</code></pre>
+<p>Gráfico que muestra la relación entre precio y puntos</p>
 <pre class="r"><code>ggplot(data = cantidad, mapping = aes(x = precio, y = cantidad))+
   geom_point()</code></pre>
 <pre><code>## Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
 <p><img src="data:image/png;base64,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" width="672" /></p>
-<p>Esto nos confirma que son pocos los vinos con precios muy
-elevados.</p>
-<ul>
-<li>¿Cuántas observaciones hay por cada grupo? ¿Cuántos valores
-faltantes? ¿Hay diferencias?</li>
-</ul>
-<p>Para responder estas preguntas empezamos agrupando por país,
-detallando la cantidad de reseñas para cada uno y las presentamos en
-orden descendente</p>
-<pre class="r"><code>vinos |&gt;
-  group_by(pais) |&gt;
-  summarise(cantidad_resenas= n()) |&gt;
-  arrange(desc(cantidad_resenas))</code></pre>
-<pre><code>## # A tibble: 44 × 2
-##    pais           cantidad_resenas
-##    &lt;chr&gt;                     &lt;int&gt;
-##  1 Estados Unidos            54504
-##  2 Francia                   22093
-##  3 Italia                    19540
-##  4 España                     6645
-##  5 Portugal                   5691
-##  6 Chile                      4472
-##  7 Argentina                  3800
-##  8 Austria                    3345
-##  9 Australia                  2329
-## 10 Alemania                   2165
-## # … with 34 more rows</code></pre>
-<p>Para saber cuantos valores faltantes hay por cada variable y en cada
-grupo, podemos hacer lo siguiente (almacenamos los resultados en un
-nuevo data.frame para utilizarlo luego con mayor facilidad)</p>
+<pre class="r"><code>summary(vinos)</code></pre>
+<pre><code>##      pais              nombre              puntos           precio       
+##  Length:129971      Length:129971      Min.   : 80.00   Min.   :   4.00  
+##  Class :character   Class :character   1st Qu.: 86.00   1st Qu.:  17.00  
+##  Mode  :character   Mode  :character   Median : 88.00   Median :  25.00  
+##                                        Mean   : 88.45   Mean   :  35.36  
+##                                        3rd Qu.: 91.00   3rd Qu.:  42.00  
+##                                        Max.   :100.00   Max.   :3300.00  
+##                                                         NA&#39;s   :8996     
+##   provincia           region_1           region_2           variedad        
+##  Length:129971      Length:129971      Length:129971      Length:129971     
+##  Class :character   Class :character   Class :character   Class :character  
+##  Mode  :character   Mode  :character   Mode  :character   Mode  :character  
+##                                                                             
+##                                                                             
+##                                                                             
+##                                                                             
+##      vina           titulo_resena     
+##  Length:129971      Length:129971     
+##  Class :character   Class :character  
+##  Mode  :character   Mode  :character  
+##                                       
+##                                       
+##                                       
+## </code></pre>
+<pre class="r"><code>vinos_nas &lt;- vinos %&gt;%
+  summarise(pais_nas = sum(is.na(pais)), nombre_nas = sum(is.na(nombre)), puntos_nas = sum(is.na(puntos)), precio_nas = sum(is.na(precio)), provincia_nas = sum(is.na(provincia)), region_1_nas = sum(is.na(region_1)), region_2_nas = sum(is.na(region_2)), variedad_nas = sum(is.na(variedad)), vina_nas = sum(is.na(vina)), titulo_resena_nas = sum(is.na(titulo_resena)))</code></pre>
+<pre class="r"><code>vinos_variedad_nas &lt;- vinos %&gt;%
+  group_by(variedad) %&gt;% 
+  summarise(pais_nas = sum(is.na(pais)), nombre_nas = sum(is.na(nombre)), puntos_nas = sum(is.na(puntos)), precio_nas = sum(is.na(precio)), provincia_nas = sum(is.na(provincia)), region_1_nas = sum(is.na(region_1)), region_2_nas = sum(is.na(region_2)), variedad_nas = sum(is.na(variedad)), vina_nas = sum(is.na(vina)), titulo_resena_nas = sum(is.na(titulo_resena)))</code></pre>
+<pre class="r"><code>vinos_variedad_nas</code></pre>
+<pre><code>## # A tibble: 708 × 11
+##    variedad pais_nas nombre_nas puntos_nas precio_nas provincia_nas region_1_nas
+##    &lt;chr&gt;       &lt;int&gt;      &lt;int&gt;      &lt;int&gt;      &lt;int&gt;         &lt;int&gt;        &lt;int&gt;
+##  1 Abouriou        0          1          0          0             0            0
+##  2 Agiorgi…        0         23          0          0             0           63
+##  3 Agliani…        0         99          0         65             0            0
+##  4 Aidani          0          0          0          0             0            1
+##  5 Airen           0          1          0          0             0            0
+##  6 Albana          0          1          0          4             0            1
+##  7 Albanel…        0          0          0          0             0            0
+##  8 Albariño        0        256          0          3             0            6
+##  9 Albaros…        0          0          0          0             0            0
+## 10 Aleatico        0          1          0          1             0            0
+## # … with 698 more rows, and 4 more variables: region_2_nas &lt;int&gt;,
+## #   variedad_nas &lt;int&gt;, vina_nas &lt;int&gt;, titulo_resena_nas &lt;int&gt;</code></pre>
+<pre class="r"><code>vinos_variedad_nas &lt;- vinos %&gt;%
+  group_by(variedad) %&gt;% 
+  summarise(cantidad_reseñas = sum(!is.na(puntos)), pais_nas = sum(is.na(pais)), nombre_nas = sum(is.na(nombre)), puntos_nas = sum(is.na(puntos)), precio_nas = sum(is.na(precio)), provincia_nas = sum(is.na(provincia)), region_1_nas = sum(is.na(region_1)), region_2_nas = sum(is.na(region_2)), variedad_nas = sum(is.na(variedad)), vina_nas = sum(is.na(vina)), titulo_resena_nas = sum(is.na(titulo_resena)))</code></pre>
+<pre class="r"><code>vinos_variedad_nas</code></pre>
+<pre><code>## # A tibble: 708 × 12
+##    variedad    cantidad_reseñas pais_nas nombre_nas puntos_nas precio_nas
+##    &lt;chr&gt;                  &lt;int&gt;    &lt;int&gt;      &lt;int&gt;      &lt;int&gt;      &lt;int&gt;
+##  1 Abouriou                   3        0          1          0          0
+##  2 Agiorgitiko               63        0         23          0          0
+##  3 Aglianico                359        0         99          0         65
+##  4 Aidani                     1        0          0          0          0
+##  5 Airen                      3        0          1          0          0
+##  6 Albana                    23        0          1          0          4
+##  7 Albanello                  1        0          0          0          0
+##  8 Albariño                 477        0        256          0          3
+##  9 Albarossa                  2        0          0          0          0
+## 10 Aleatico                   5        0          1          0          1
+## # … with 698 more rows, and 6 more variables: provincia_nas &lt;int&gt;,
+## #   region_1_nas &lt;int&gt;, region_2_nas &lt;int&gt;, variedad_nas &lt;int&gt;, vina_nas &lt;int&gt;,
+## #   titulo_resena_nas &lt;int&gt;</code></pre>
 <pre class="r"><code>vinos_pais_nas &lt;- vinos %&gt;%
   group_by(pais) %&gt;% 
-  summarise(cantidad_reseñas = n(), pais_nas = sum(is.na(pais)), nombre_nas = sum(is.na(nombre)), puntos_nas = sum(is.na(puntos)), precio_nas = sum(is.na(precio)), provincia_nas = sum(is.na(provincia)), region_1_nas = sum(is.na(region_1)), region_2_nas = sum(is.na(region_2)), variedad_nas = sum(is.na(variedad)), vina_nas = sum(is.na(vina)), titulo_resena_nas = sum(is.na(titulo_resena))) %&gt;%
-  arrange(desc(cantidad_reseñas))</code></pre>
-<p>Esto nos permite conocer la cantidad de valores faltantes de cada
-grupo para cada variable. Para evaluar si existen diferencias entre
-grupos resulta más conveniente ver la proporcion de valores faltantes en
-el total de reseñas, a continuación se presenta este procedimiento para
-la variable nombre a modo de ejemplo</p>
+  summarise(cantidad_reseñas = sum(!is.na(puntos)), pais_nas = sum(is.na(pais)), nombre_nas = sum(is.na(nombre)), puntos_nas = sum(is.na(puntos)), precio_nas = sum(is.na(precio)), provincia_nas = sum(is.na(provincia)), region_1_nas = sum(is.na(region_1)), region_2_nas = sum(is.na(region_2)), variedad_nas = sum(is.na(variedad)), vina_nas = sum(is.na(vina)), titulo_resena_nas = sum(is.na(titulo_resena)))</code></pre>
+<pre class="r"><code>vinos_pais_nas</code></pre>
+<pre><code>## # A tibble: 44 × 12
+##    pais               cantidad_reseñas pais_nas nombre_nas puntos_nas precio_nas
+##    &lt;chr&gt;                         &lt;int&gt;    &lt;int&gt;      &lt;int&gt;      &lt;int&gt;      &lt;int&gt;
+##  1 Alemania                       2165        0        159          0         45
+##  2 Argentina                      3800        0        898          0         44
+##  3 Armenia                           2        0          0          0          0
+##  4 Australia                      2329        0        689          0         35
+##  5 Austria                        3345        0        520          0        546
+##  6 Bosnia y Herzegov…                2        0          1          0          0
+##  7 Brazil                           52        0          1          0          5
+##  8 Bulgaria                        141        0         48          0          0
+##  9 Canadá                          257        0         78          0          3
+## 10 Chile                          4472        0        593          0         56
+## # … with 34 more rows, and 6 more variables: provincia_nas &lt;int&gt;,
+## #   region_1_nas &lt;int&gt;, region_2_nas &lt;int&gt;, variedad_nas &lt;int&gt;, vina_nas &lt;int&gt;,
+## #   titulo_resena_nas &lt;int&gt;</code></pre>
 <pre class="r"><code>vinos_pais_nas &lt;- vinos_pais_nas |&gt;
-  mutate(proporción_nombre_nas = nombre_nas/cantidad_reseñas)</code></pre>
-<pre class="r"><code>vinos_pais_nas |&gt;
-  select(pais, proporción_nombre_nas, cantidad_reseñas) |&gt;
-  arrange(desc(proporción_nombre_nas))</code></pre>
-<pre><code>## # A tibble: 44 × 3
-##    pais                 proporción_nombre_nas cantidad_reseñas
-##    &lt;chr&gt;                                &lt;dbl&gt;            &lt;int&gt;
-##  1 Eslovaquia                           1                    1
-##  2 Macedonia                            0.583               12
-##  3 Suiza                                0.571                7
-##  4 India                                0.556                9
-##  5 Nueva Zelanda                        0.518             1419
-##  6 Bosnia y Herzegovina                 0.5                  2
-##  7 Marruecos                            0.429               28
-##  8 República Checa                      0.417               12
-##  9 Sudáfrica                            0.413             1401
-## 10 Croacia                              0.342               73
+  mutate(proporción_nombre_nas = nombre_nas/cantidad_reseñas)  </code></pre>
+<pre class="r"><code>select(vinos_pais_nas, pais, proporción_nombre_nas)</code></pre>
+<pre><code>## # A tibble: 44 × 2
+##    pais                 proporción_nombre_nas
+##    &lt;chr&gt;                                &lt;dbl&gt;
+##  1 Alemania                            0.0734
+##  2 Argentina                           0.236 
+##  3 Armenia                             0     
+##  4 Australia                           0.296 
+##  5 Austria                             0.155 
+##  6 Bosnia y Herzegovina                0.5   
+##  7 Brazil                              0.0192
+##  8 Bulgaria                            0.340 
+##  9 Canadá                              0.304 
+## 10 Chile                               0.133 
 ## # … with 34 more rows</code></pre>
-<p>La cantidad de nombres faltantes difiere entre paises. Este análisis
-podría replicarse para otras variables.</p>
+<pre class="r"><code>vinos_pais &lt;- vinos |&gt;
+  group_by(pais) |&gt;
+  summarise(precio_promedio = mean(precio, na.rm = TRUE))</code></pre>
+<pre class="r"><code>#Filter(vinos_pais_nas, pais == Brazil)</code></pre>
+<pre class="r"><code>distinct(vinos, pais)</code></pre>
+<pre><code>##                    pais
+## 1                Italia
+## 2              Portugal
+## 3        Estados Unidos
+## 4                España
+## 5               Francia
+## 6              Alemania
+## 7             Argentina
+## 8                 Chile
+## 9             Australia
+## 10              Austria
+## 11            Sudáfrica
+## 12        Nueva Zelanda
+## 13               Israel
+## 14              Hungría
+## 15               Grecia
+## 16              Rumania
+## 17               México
+## 18               Canadá
+## 19                 &lt;NA&gt;
+## 20              Turquía
+## 21      República Checa
+## 22            Eslovenia
+## 23           Luxemburgo
+## 24              Croacia
+## 25              Georgia
+## 26              Uruguay
+## 27           Inglaterra
+## 28               Líbano
+## 29               Serbia
+## 30               Brazil
+## 31             Moldavia
+## 32            Marruecos
+## 33                 Perú
+## 34                India
+## 35             Bulgaria
+## 36               Chipre
+## 37              Armenia
+## 38                Suiza
+## 39 Bosnia y Herzegovina
+## 40              Ucrania
+## 41           Eslovaquia
+## 42            Macedonia
+## 43                China
+## 44               Egipto</code></pre>
 </div>
 <div id="hipótesis" class="section level2">
 <h2>Hipótesis</h2>
-<p>1- Los vinos de mayor precio reciben mayor puntaje.</p>
-<p>2- En cada provincia/region la producción se especializa fuertemente
-en una variedad particular de vinos</p>
-<p>3- Para las variedades de vinos más reseñadas, el precio difiere
-significativamente según se trate de vinos provenientes del hemisferio
-norte o del hemisferio sur.</p>
 </div>
 
 
