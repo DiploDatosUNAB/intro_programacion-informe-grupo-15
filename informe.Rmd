@@ -49,7 +49,7 @@ nrow(vinos)
 
 ## Análisis de variables seleccionadas 
 
-Puedo utilizar la función summary() y obtener algunos estádisticos para las variables numéricas: mínimo, máximo, promedio, cuartiles, mediana, etc.
+Podemos utilizar la función summary() y obtener algunos estádisticos para las variables numéricas: mínimo, máximo, promedio, cuartiles, mediana, etc.
 
 ```{r}
 vinos |>
