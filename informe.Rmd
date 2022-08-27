@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(readr)
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 ```
 
@@ -49,32 +50,22 @@ nrow(vinos)
 
 ## Análisis de variables seleccionadas 
 
-Podemos utilizar la función summary() y obtener algunos estádisticos para las variables numéricas: mínimo, máximo, promedio, cuartiles, mediana, etc.
+Para lo anterior podemos utilizar la función summarise() y obtener algunos estádisticos para las variables numéricas: mínimo, máximo, promedio y desvìo estándar.
+
+Cambiamos la estructura de datos para abreviar el código. Utilizamos la función pivot_longer para "alargar"  
+
 
 ```{r}
 vinos |>
-  select(precio, puntos) |>
-  summary()
-```
-Alternativamente, se podría haber utilizado las siguientes operaciones para obtener resultados similares
-
-```{r}
-# Caracterizo la variable precio
-vinos|>
-  summarise(precio_promedio = mean(precio, na.rm = TRUE), 
-            precio_desvest = sd(precio, na.rm = TRUE),
-            precio_mín = min(precio, na.rm = TRUE),
-            precio_máx = max(precio, na.rm = TRUE))
+  select(precio, puntos) |> 
+  pivot_longer(cols = 1:2, names_to = "variable", values_to = "valor") |> 
+  group_by(variable) |> 
+  summarise(promedio = mean(valor, na.rm = TRUE), 
+            sd = sd(valor, na.rm = TRUE),
+            min = min(valor, na.rm = TRUE),
+            max = max(valor, na.rm = TRUE))
 ```
 
-```{r}
-# Caracterizo la variable puntos
-vinos|>
-  summarise(puntos_promedio = mean(puntos, na.rm = TRUE), 
-            puntos_desvest = sd(puntos, na.rm = TRUE),
-            puntos_mín = min(puntos, na.rm = TRUE),
-            puntos_máx = max(puntos, na.rm = TRUE))
-```
 
 - ¿Hay alguna anomalía que sugiera que hay datos incorrectos? Valores imposibles (como valores negativos en una variable que sólo puede ser positiva) o poco creíbles.
 
@@ -87,19 +78,15 @@ vinos|>
 ```
 Como se observa el impacto de esta exclusión no es muy significativo.
 
-Además, podemos graficar la cantidad de vinos reseñados para cada precio.
-Primero generamos un data.frame auxiliar y luego lo utilizamos para graficar
-```{r}
-cantidad <- vinos |>
-  group_by(precio) |>
-  summarise(cantidad = n())
+Además, podemos graficar la cantidad de vinos reseñados para cada rango de precios utilizando un histograma.
 
-```
 
 ```{r}
-ggplot(data = cantidad, mapping = aes(x = precio, y = cantidad))+
-  geom_point()
+vinos |> 
+  ggplot(aes(precio)) + 
+  geom_histogram(binwidth = 15)
 ```
+
 
 Esto nos confirma que son pocos los vinos con precios muy elevados. 
 
@@ -118,7 +105,17 @@ Para saber cuantos valores faltantes hay por cada variable y en cada grupo, pode
 ```{r}
 vinos_pais_nas <- vinos %>%
   group_by(pais) %>% 
-  summarise(cantidad_reseñas = n(), pais_nas = sum(is.na(pais)), nombre_nas = sum(is.na(nombre)), puntos_nas = sum(is.na(puntos)), precio_nas = sum(is.na(precio)), provincia_nas = sum(is.na(provincia)), region_1_nas = sum(is.na(region_1)), region_2_nas = sum(is.na(region_2)), variedad_nas = sum(is.na(variedad)), vina_nas = sum(is.na(vina)), titulo_resena_nas = sum(is.na(titulo_resena))) %>%
+  summarise(cantidad_reseñas = n(), 
+            pais_nas = sum(is.na(pais)), 
+            nombre_nas = sum(is.na(nombre)), 
+            puntos_nas = sum(is.na(puntos)), 
+            precio_nas = sum(is.na(precio)), 
+            provincia_nas = sum(is.na(provincia)), 
+            region_1_nas = sum(is.na(region_1)), 
+            region_2_nas = sum(is.na(region_2)), 
+            variedad_nas = sum(is.na(variedad)), 
+            vina_nas = sum(is.na(vina)), 
+            titulo_resena_nas = sum(is.na(titulo_resena))) %>%
   arrange(desc(cantidad_reseñas))
 ```
 
@@ -130,17 +127,28 @@ vinos_pais_nas <- vinos_pais_nas |>
   mutate(proporción_nombre_nas = nombre_nas/cantidad_reseñas)
 ```
 
+
 ```{r}
 vinos_pais_nas |>
   select(pais, proporción_nombre_nas, cantidad_reseñas) |>
-  arrange(desc(proporción_nombre_nas))
+  ggplot(aes(proporción_nombre_nas, pais)) +
+  geom_col() 
+#revisar las etiquetas que se superponen al mostrar el eje
 ```
+
+
 La cantidad de nombres faltantes difiere entre paises. Este análisis podría replicarse para otras variables. 
 
 ## Hipótesis
 
 1- Los vinos de mayor precio reciben mayor puntaje.
 
-2- En cada provincia/region la producción se especializa fuertemente en una variedad particular de vinos.
+Armar un gráfico, luego intentar regresión. 
+
+2- Para cada provincia/region las variedades reseñadas se concentran fuertemente en una variedad particular de vinos.
+
+Pensar un indicador de concentración. Cuántos variedades distintas de vinos hay para cada provincia / rergión y cuàl es la participación de la cepa / variedad más reseñada para esa provincia / región. Observar casos de regiones que tienen pocos registros (quizas convenga excluirlos del análisis, en función de n reseñas)
 
 3- Para las variedades de vinos más reseñadas, el precio difiere significativamente según se trate de vinos provenientes del hemisferio norte o del hemisferio sur.
+
+Identificar variedades de vinos reseñadas más reseñadas y que tengan producción en ambos hemisferios y ver con cuales nos quedamos . Validar la hipótesis. 
