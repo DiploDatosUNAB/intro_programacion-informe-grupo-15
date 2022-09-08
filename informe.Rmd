@@ -143,12 +143,64 @@ La cantidad de nombres faltantes difiere entre paises. Este análisis podría re
 
 1- Los vinos de mayor precio reciben mayor puntaje.
 
-Armar un gráfico, luego intentar regresión. 
+Para obtener una primera aproximación a la validez de esta hipótesis, graficamos ambas variables
+
+```{r}
+vinos |> 
+  ggplot(aes( x = precio, y = puntos))+
+  geom_count()
+```
+EL gráfico no es muy concluyente. Calculamos el puntaje promedio que se obtiene para cada precio y graficamos los resultados
+
+```{r}
+vinos |> 
+  group_by(precio) |> 
+  summarise(puntaje_prom = mean(puntos)) |> 
+  ggplot(aes(x = precio, y = puntaje_prom))+
+  geom_point()
+```
+
+Para los vinos de menor precio se observa claramente que el puntaje promedio crece a la par que el precio se incrementa. Sin embargo, esa relación no se mantiene para todo el rango de precios, al menos no de forma inequívoca. 
+
+Recordando que la gran mayoría de los vinos se encuentran en un rango de precios bajo, podemos analizar la validez de la hipótesis separando las observaciones en dos conjuntos. Cómo parámetro para dividirlas utilizaremos el precio promedio más dos desvíos estándar de esta misma variable
+
+# #AUTOMATIZAR EL 117.4 USADO ABAJO
+
+```{r}
+vinos |> 
+  filter(precio <= 117.4) |> 
+  group_by(precio) |> 
+  summarise(puntaje_prom = mean(puntos)) |> 
+  ggplot(aes(x = precio, y = puntaje_prom))+
+  geom_point()
+```
+
+
+```{r}
+vinos |> 
+  filter( precio >= 117.4) |> 
+  group_by(precio) |> 
+  summarise(puntaje_prom = mean(puntos)) |> 
+  ggplot(aes(x = precio, y = puntaje_prom))+
+  geom_point()
+```
+Estos últimos gráficos, permiten confirmar que nuestra hipótesis es compatible con vinos de precios bajos, pierde validez a medida que el precio crece y directamente no parece compatible con vinos de precios altos (por ejemplo mayores a 500 o 1000). 
+
+Por último realizamos una regresión lineal para profundizar la evaluación 
+
+```{r}
+  summary(lm(vinos$precio ~ vinos$puntos))
+```
+El r cuadrado obtenido es muy bajo. Esto se debe a una gran variabilidad en el puntaje otorgado a vinos del mismo precio o precios similares. 
+
+En definitiva, si bien se observa que en el puntaje promedio crece a medida que aumenta el precio de los vinos, la variabilidad es muy alta como para establecer una asociación sencilla entre ambas variables.
 
 2- Para cada provincia/region las variedades reseñadas se concentran fuertemente en una variedad particular de vinos.
 
-Pensar un indicador de concentración. Cuántos variedades distintas de vinos hay para cada provincia / rergión y cuàl es la participación de la cepa / variedad más reseñada para esa provincia / región. Observar casos de regiones que tienen pocos registros (quizas convenga excluirlos del análisis, en función de n reseñas)
+Pensar un indicador de concentración. Cuántos variedades distintas de vinos hay para cada provincia / región y cuál es la participación de la cepa / variedad más reseñada para esa provincia / región. Observar casos de regiones que tienen pocos registros (quizas convenga excluirlos del análisis, en función de n reseñas)
 
 3- Para las variedades de vinos más reseñadas, el precio difiere significativamente según se trate de vinos provenientes del hemisferio norte o del hemisferio sur.
 
 Identificar variedades de vinos reseñadas más reseñadas y que tengan producción en ambos hemisferios y ver con cuales nos quedamos . Validar la hipótesis. 
+
+
