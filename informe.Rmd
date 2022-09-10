@@ -165,8 +165,6 @@ Para los vinos de menor precio se observa claramente que el puntaje promedio cre
 
 Recordando que la gran mayoría de los vinos se encuentran en un rango de precios bajo, podemos analizar la validez de la hipótesis separando las observaciones en dos conjuntos. Cómo parámetro para dividirlas utilizaremos el precio promedio más dos desvíos estándar de esta misma variable
 
-# #AUTOMATIZAR EL 117.4 USADO ABAJO
-
 ```{r}
 vinos |> 
   filter(precio <= 117.4) |> 
@@ -188,16 +186,9 @@ vinos |>
 
 Estos últimos gráficos, permiten confirmar que nuestra hipótesis es compatible con vinos de precios bajos, pierde validez a medida que el precio crece y directamente no parece compatible con vinos de precios altos (por ejemplo mayores a 500 o 1000). 
 
-Por último realizamos una regresión lineal para profundizar la evaluación 
+2- Para cada provincia las variedades reseñadas se concentran fuertemente en una variedad particular de vinos.
 
-```{r}
-  summary(lm(vinos$precio ~ vinos$puntos))
-```
-El r cuadrado obtenido es muy bajo. Esto se debe a una gran variabilidad en el puntaje otorgado a vinos del mismo precio o precios similares. 
-
-En definitiva, si bien se observa que en el puntaje promedio crece a medida que aumenta el precio de los vinos, la variabilidad es muy alta como para establecer una asociación sencilla entre ambas variables.
-
-2- Para cada provincia/region las variedades reseñadas se concentran fuertemente en una variedad particular de vinos.
+En primer lugar, calculamos la cantidad de reseñas que corresponde a cada provincia. 
 
 ```{r}
 resenas_provincia <- vinos |> 
@@ -205,6 +196,8 @@ resenas_provincia <- vinos |>
   summarise(cantidad_resenas_prov = n()) |> 
   arrange(desc(cantidad_resenas_prov))
 ```
+
+Luego generamos un indicador sencillo que permita apreciar cuánto representa la principal variedad reseñada de cada provincia en el total de reseñas de esa provicia. 
 
 ```{r}
 concentracion_provincia <- vinos |> 
@@ -217,43 +210,20 @@ concentracion_provincia <- vinos |>
   slice_max(proporcion, with_ties = FALSE) |> 
   arrange(desc(cantidad_resenas_prov))
 ```
+
+Filtramos las provincias que tienen una concentración mínima de 50%. 
+
 ```{r}
 concentracion_provincia |> 
   filter(proporcion >= 0.5) 
 ```
 
-Más de la mitad de las provincias (229 de 426) tienen una concrentración de al menos un 50% de sus reseñas explicadas por la principal variedad reseñada.
-
-## COMPLETAR GRÁFICO CON CASOS ACUMULADOS O ELIMINAR
-
-```{r}
-concentracion_provincia |> 
-  head(30) |> 
-  ggplot(aes(x = proporcion, y = provincia))+
-  geom_col()
-```
-
-```{r}
-concentracion_provincia |> 
-  ggplot(aes(proporcion))+
-  geom_histogram()
-
-```
-
+Más de la mitad de las provincias (229 de 426) tienen una concrentración de al menos un 50% de sus reseñas explicadas por la principal variedad reseñada. Lo que confirma nuestra hipótesis.
 
 3- Para las variedades de vinos más reseñadas, el precio difiere significativamente según se trate de vinos provenientes del hemisferio norte o del hemisferio sur.
 
-```{r}
-vinos |> 
-  group_by(variedad) |> 
-  summarise(cantidad_reseñas = n()) |> 
-  arrange(desc(cantidad_reseñas))
-```
+Elaboramos un listado de los países de origen de los vinos reseñados y definimos manualmente el hemisferio al que pertenecen.
 
-
-Identificar variedades de vinos reseñadas más reseñadas y que tengan producción en ambos hemisferios y ver con cuales nos quedamos. Validar la hipótesis. 
-
-listado de países y definimos manualmente el hemisferio al que pertenecen
 ```{r}
 pais_hemisferio <- vinos |> 
   distinct(pais) |>
@@ -261,10 +231,14 @@ pais_hemisferio <- vinos |>
   mutate(hemisferio = c("N","S","N","S","N","N","S","N","N","S","N","N","N","N","N","N","N","N","N","N","N","N","N","N","N","N","N","N","N","N","N","N","S","S","N","N","N","N","S","N","N","N","S",NA))
 ```
 
+Luego generamos un nuevo set de datos que contenga el valor hemisferio que corresponde a cada país.
+
 ```{r}
 vinos_hemisferio <- vinos |> 
   left_join(pais_hemisferio, by = "pais")
 ```
+
+A continuación, identificamos las principales variedades reseñadas. Podemos ver que las 10 principales tienen producción en ambos hemisferios. 
 
 ```{r}
 vinos_hemisferio |> 
@@ -273,12 +247,11 @@ vinos_hemisferio |>
   summarise(cantidad_reseñas = n()) |> 
   pivot_wider(names_from = hemisferio,values_from = cantidad_reseñas) |> 
   mutate(total = N+S) |> 
-  arrange(desc(total))
+  arrange(desc(total)) |> 
+  head(10)
 ```
 
-Quedan 702 variedades porque hay 6 de ellas para las cuáles ninguna de sus reseñas indica el país de origen. No pueden ser consideradas para esta hipótesis. 
-
-Nos quedamos con las 10 principales variedades, todas ellas tienen producción en los hemisferios norte y sur. 
+Definimos un nuevo objeto que contenga estas variedades. 
 
 ```{r}
 variedades_mas_resenadas <- vinos_hemisferio |> 
@@ -291,6 +264,8 @@ variedades_mas_resenadas <- vinos_hemisferio |>
   head(10) |> 
   select(variedad)
 ```
+Luego lo utilizamos para calcular el precio promedio de cada una según el hemisferio del país de origen y un ratio que relacione estos precios y nos permita evaluar la hipótesis. 
+
 ```{r}
 vinos_hemisferio |> 
   filter(hemisferio =="N" | hemisferio =="S") |> 
@@ -301,4 +276,4 @@ vinos_hemisferio |>
   mutate(ratio = N/S)
 ```
 
-Se observan diferencias significativas en el precio promedio de cada variedad según el hemisferio de dónde provengan. En general, el precio del hemisferio norte es más caro, en algunos casos más que duplicando el precio del hemisferio sur. 
+A simple vista, se observan diferencias significativas en el precio promedio de cada variedad según el hemisferio de dónde provengan. En general, el precio del hemisferio norte es más caro, en algunos casos más que duplicando el precio del hemisferio sur. 
