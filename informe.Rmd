@@ -87,6 +87,15 @@ vinos |>
   geom_histogram(binwidth = 15)
 ```
 
+Adicionalmente mostramos el mismo gráfico con un escala diferente para el eje x.
+
+```{r}
+vinos |> 
+  ggplot(aes(precio)) +
+  geom_histogram() +
+  scale_x_log10()
+```
+
 
 Esto nos confirma que son pocos los vinos con precios muy elevados. 
 
@@ -157,17 +166,53 @@ El gráfico no es muy concluyente. Calculamos el puntaje promedio que se obtiene
 vinos |> 
   group_by(precio) |> 
   summarise(puntaje_prom = mean(puntos)) |> 
-  ggplot(aes(x = precio, y = puntaje_prom))+
+  ggplot(aes(x =  precio, y = puntaje_prom))+
   geom_point()
 ```
+
+
+```{r}
+vinos |> 
+  group_by(precio) |> 
+  summarise(puntaje_prom = mean(puntos)) |> 
+  ggplot(aes(x =  precio, y = puntaje_prom))+
+  geom_point() 
+```
+
+Utilización de función cut_width() para discretizar la variable continua "precio". 
+
+```{r}
+vinos |> 
+  mutate(precio_discreto = cut_width(precio, width = 20)) |> 
+  group_by(precio_discreto) |> 
+  summarise(puntaje_prom = mean(puntos)) |> 
+  ggplot(aes(x =  precio_discreto, y = puntaje_prom))+
+  geom_point() 
+```
+
 
 Para los vinos de menor precio se observa claramente que el puntaje promedio crece a la par que el precio se incrementa. Sin embargo, esa relación no se mantiene para todo el rango de precios, al menos no de forma inequívoca. 
 
 Recordando que la gran mayoría de los vinos se encuentran en un rango de precios bajo, podemos analizar la validez de la hipótesis separando las observaciones en dos conjuntos. Cómo parámetro para dividirlas utilizaremos el precio promedio más dos desvíos estándar de esta misma variable
 
 ```{r}
+eje_x=vinos |>
+  select(precio, puntos) |> 
+  pivot_longer(cols = 1:2, names_to = "variable", values_to = "valor") |> 
+  group_by(variable) |> 
+  summarise(promedio = mean(valor, na.rm = TRUE), 
+            sd = sd(valor, na.rm = TRUE),
+            min = min(valor, na.rm = TRUE),
+            max = max(valor, na.rm = TRUE)) |> 
+  filter(variable == "precio") |> 
+  mutate(eje_x = promedio+2*sd) |> 
+  select (eje_x)
+
+```
+
+```{r}
 vinos |> 
-  filter(precio <= 117.4) |> 
+  filter(precio <= as.numeric(eje_x)) |> 
   group_by(precio) |> 
   summarise(puntaje_prom = mean(puntos)) |> 
   ggplot(aes(x = precio, y = puntaje_prom))+
@@ -177,7 +222,7 @@ vinos |>
 
 ```{r}
 vinos |> 
-  filter( precio >= 117.4) |> 
+  filter( precio >= as.numeric(eje_x)) |> 
   group_by(precio) |> 
   summarise(puntaje_prom = mean(puntos)) |> 
   ggplot(aes(x = precio, y = puntaje_prom))+
@@ -202,7 +247,7 @@ Luego generamos un indicador sencillo que permita apreciar cuánto representa la
 ```{r}
 concentracion_provincia <- vinos |> 
   group_by(provincia,variedad) |> 
-  summarise(cantidad_resenas_prov_var = n(), ) |> 
+  summarise(cantidad_resenas_prov_var = n() ) |> 
   arrange(desc(cantidad_resenas_prov_var)) |> 
   left_join(resenas_provincia, by = "provincia") |> 
   mutate(proporcion = cantidad_resenas_prov_var / cantidad_resenas_prov) |> 
