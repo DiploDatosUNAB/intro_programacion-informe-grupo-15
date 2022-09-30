@@ -699,20 +699,19 @@ de reseñas de esa provicia.</p>
   filter(proporcion &gt;= 0.5) </code></pre>
 <pre><code>## # A tibble: 229 × 5
 ## # Groups:   provincia [229]
-##    provincia  variedad                 proporcion cantidad_resenas_pro…¹ canti…²
-##    &lt;chr&gt;      &lt;chr&gt;                         &lt;dbl&gt;                  &lt;int&gt;   &lt;int&gt;
-##  1 Bordeaux   Bordeaux-style Red Blend      0.777                   4617    5941
-##  2 Oregon     Pinot Noir                    0.519                   2786    5373
-##  3 Burgundy   Chardonnay                    0.581                   2312    3980
-##  4 Piedmont   Nebbiolo                      0.714                   2664    3729
-##  5 Champagne  Champagne Ensamblaje          0.757                   1221    1613
-##  6 Provence   Rosé                          0.789                   1062    1346
-##  7 Douro      Portuguese Red                0.687                    880    1281
-##  8 Beaujolais Gamay                         0.945                    987    1044
-##  9 Mosel      Riesling                      0.973                   1011    1039
-## 10 Alentejano Portuguese Red                0.571                    535     937
-## # … with 219 more rows, and abbreviated variable names
-## #   ¹​cantidad_resenas_prov_var, ²​cantidad_resenas_prov</code></pre>
+##    provincia  variedad              proporcion cantidad_resena… cantidad_resena…
+##    &lt;chr&gt;      &lt;chr&gt;                      &lt;dbl&gt;            &lt;int&gt;            &lt;int&gt;
+##  1 Bordeaux   Bordeaux-style Red B…      0.777             4617             5941
+##  2 Oregon     Pinot Noir                 0.519             2786             5373
+##  3 Burgundy   Chardonnay                 0.581             2312             3980
+##  4 Piedmont   Nebbiolo                   0.714             2664             3729
+##  5 Champagne  Champagne Ensamblaje       0.757             1221             1613
+##  6 Provence   Rosé                       0.789             1062             1346
+##  7 Douro      Portuguese Red             0.687              880             1281
+##  8 Beaujolais Gamay                      0.945              987             1044
+##  9 Mosel      Riesling                   0.973             1011             1039
+## 10 Alentejano Portuguese Red             0.571              535              937
+## # … with 219 more rows</code></pre>
 <p>Más de la mitad de las provincias (229 de 426) tienen una
 concrentración de al menos un 50% de sus reseñas explicadas por la
 principal variedad reseñada. Lo que confirma nuestra hipótesis.</p>

@@ -1,12 +1,13 @@
 ---
-title: "Trabajo Práctico 1"
+title: "Trabajo Práctico Final - Reseñas de vinos"
 author: "Ankudowicz Santiago y Ferrero Kevin"
-output: html_document
+output: 
+  html_document:
+    code_folding: hide
 ---
 
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
 library(readr)
 library(dplyr)
 library(tidyr)
@@ -170,26 +171,17 @@ vinos |>
   geom_point()
 ```
 
-
+Utilizamos la función cut_width() para discretizar la variable continua "precio". 
 ```{r}
-vinos |> 
-  group_by(precio) |> 
-  summarise(puntaje_prom = mean(puntos)) |> 
-  ggplot(aes(x =  precio, y = puntaje_prom))+
-  geom_point() 
-```
-
-Utilización de función cut_width() para discretizar la variable continua "precio". 
-
-```{r}
-vinos |> 
-  mutate(precio_discreto = cut_width(precio, width = 20)) |> 
+vinos |>
+  filter(is.na(precio) == FALSE) |> 
+  mutate(precio_discreto = cut_width(precio, width = 20, boundary = 0)) |> 
   group_by(precio_discreto) |> 
   summarise(puntaje_prom = mean(puntos)) |> 
   ggplot(aes(x =  precio_discreto, y = puntaje_prom))+
-  geom_point() 
+  geom_point()+
+  theme(axis.text.x = element_text(angle = 90, size = 6))
 ```
-
 
 Para los vinos de menor precio se observa claramente que el puntaje promedio crece a la par que el precio se incrementa. Sin embargo, esa relación no se mantiene para todo el rango de precios, al menos no de forma inequívoca. 
 
@@ -322,3 +314,18 @@ vinos_hemisferio |>
 ```
 
 A simple vista, se observan diferencias significativas en el precio promedio de cada variedad según el hemisferio de dónde provengan. En general, el precio del hemisferio norte es más caro, en algunos casos más que duplicando el precio del hemisferio sur. 
+
+Verificamos si estas diferencias se deben a una mejor calidad de los vinos del norte. Para ello calculamos un indicador que refleje la valoración de cada vino en relación al precio pagado y comparamos para el mismo universo.  
+
+```{r}
+vinos_hemisferio |> 
+  mutate(calidad = puntos/precio)|> 
+  filter(hemisferio =="N" | hemisferio =="S") |> 
+  semi_join(variedades_mas_resenadas, by = "variedad") |> 
+  group_by(variedad,hemisferio) |> 
+  summarise(calidad_prom = mean(calidad, na.rm = TRUE)) |> 
+  pivot_wider(names_from = hemisferio, values_from = calidad_prom) |> 
+  mutate(ratio = N/S)
+```
+La relación precio calidad es sistemáticamente mejor para los vinos del hemisferio sur. Las diferencias de precio no provienen de diferencias de calidad. 
+
